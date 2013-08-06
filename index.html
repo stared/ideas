@@ -538,6 +538,23 @@ Most likely with some interactive JS simulations. Maybe even a [[Game on Quantum
 * https://github.com/CamDavidsonPilon/Probabilistic-Programming-and-Bayesian-Methods-for-Hackers 
 </pre>
 </div>
+<div title="Circuits Overload" creator="Piotr Migdał" modifier="Piotr Migdał" created="201308060648" changecount="1">
+<pre>A (computer) puzzle game with tiles being real electrical elements (cells, resistors, inductive coils, capacitors, diodes, fuses, light bulbs).
+
+Have been working with it with [[the guy behind Velocity Raptor and Agent Higgs|http://www.testtubegames.com/]] (both highly recommendable).
+
+Sadly, now it is frozen due to time shortage (on my side).
+
+</pre>
+</div>
+<div title="Confrenzy" creator="Piotr Migdał" modifier="Piotr Migdał" created="201306291430" modified="201306291430" changecount="2">
+<pre>Maybe reactivation with Meteor?</pre>
+</div>
+<div title="Curva-turn" creator="Piotr Migdał" modifier="Piotr Migdał" created="201308060643" changecount="1">
+<pre>A rogue-like game in which the player explores 2D surfaces of various curvature.
+
+Largely inspired by [[HyperRogue||http://www.roguetemple.com/z/hyper.php]] and [[mathematical curiosities|http://math.ucr.edu/home/baez/klein.html]].</pre>
+</div>
 <div title="DefaultTiddlers" creator="Piotr Migdał" modifier="Piotr Migdał" created="201305191809" changecount="1">
 <pre>[[Ideas]]</pre>
 </div>
@@ -547,7 +564,7 @@ Most likely with some interactive JS simulations. Maybe even a [[Game on Quantum
 * [[Curva-turn]]
 * [[Network of grades]]</pre>
 </div>
-<div title="Ideas" creator="Piotr Migdał" modifier="Piotr Migdał" created="201305191809" modified="201306162121" tags="main" changecount="8">
+<div title="Ideas" creator="Piotr Migdał" modifier="Piotr Migdał" created="201305191809" modified="201306201547" tags="main" changecount="9">
 <pre>List of ideas:
 
 
@@ -562,6 +579,7 @@ Most likely with some interactive JS simulations. Maybe even a [[Game on Quantum
 * [[Conceptual metaphors mining]]
 * [[E-mail analysis]]
 * [[Confrenzy]]
+* [[Unlinked findings]]
 
 Research:
 
@@ -574,6 +592,82 @@ Research:
 [[Meta]]
 [[Hot]]</pre>
 </div>
+<div title="MathJaxPlugin" creator="Piotr Migdał" modifier="Piotr Migdał" created="201306281820" modified="201306281822" tags="plugin systemConfig" changecount="2">
+<pre>/***
+|''Name:''|MathJaxPlugin|
+|''Description:''|Enable LaTeX formulas for TiddlyWiki|
+|''Version:''|1.0.1|
+|''Date:''|Feb 11, 2012|
+|''Source:''|http://www.guyrutenberg.com/2011/06/25/latex-for-tiddlywiki-a-mathjax-plugin|
+|''Author:''|Guy Rutenberg|
+|''License:''|[[BSD open source license]]|
+|''~CoreVersion:''|2.5.0|
+ 
+!! Changelog
+!!! 1.0.1 Feb 11, 2012
+* Fixed interoperability with TiddlerBarPlugin
+!! How to Use
+Currently the plugin supports the following delemiters:
+* &quot;&quot;&quot;\(&quot;&quot;&quot;..&quot;&quot;&quot;\)&quot;&quot;&quot; - Inline equations
+* &quot;&quot;&quot;$$&quot;&quot;&quot;..&quot;&quot;&quot;$$&quot;&quot;&quot; - Displayed equations
+* &quot;&quot;&quot;\[&quot;&quot;&quot;..&quot;&quot;&quot;\]&quot;&quot;&quot; - Displayed equations
+!! Demo
+This is an inline equation \(P(E)   = {n \choose k} p^k (1-p)^{ n-k}\) and this is a displayed equation:
+\[J_\alpha(x) = \sum_{m=0}^\infty \frac{(-1)^m}{m! \, \Gamma(m + \alpha + 1)}{\left({\frac{x}{2}}\right)}^{2 m + \alpha}\]
+This is another displayed equation $$e=mc^2$$
+!! Code
+***/
+//{{{
+config.extensions.MathJax = {
+  mathJaxScript : &quot;http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot;,
+  // uncomment the following line if you want to access MathJax using SSL
+  // mathJaxScript : &quot;https://d3eoax9i5htok0.cloudfront.net/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot;,
+  displayTiddler: function(TiddlerName) {
+    config.extensions.MathJax.displayTiddler_old.apply(this, arguments);
+    MathJax.Hub.Queue([&quot;Typeset&quot;, MathJax.Hub]);
+  }
+};
+ 
+jQuery.getScript(config.extensions.MathJax.mathJaxScript, function(){
+    MathJax.Hub.Config({
+      extensions: [&quot;tex2jax.js&quot;],
+      &quot;HTML-CSS&quot;: { scale: 100 }
+    });
+ 
+    MathJax.Hub.Startup.onload();
+    config.extensions.MathJax.displayTiddler_old = story.displayTiddler;
+    story.displayTiddler = config.extensions.MathJax.displayTiddler;
+});
+ 
+config.formatters.push({
+	name: &quot;mathJaxFormula&quot;,
+	match: &quot;\\\\\\[|\\$\\$|\\\\\\(&quot;,
+	//lookaheadRegExp: /(?:\\\[|\$\$)((?:.|\n)*?)(?:\\\]|$$)/mg,
+	handler: function(w)
+	{
+		switch(w.matchText) {
+		case &quot;\\[&quot;: // displayed equations
+			this.lookaheadRegExp = /\\\[((?:.|\n)*?)(\\\])/mg;
+			break;
+		case &quot;$$&quot;: // inline equations
+			this.lookaheadRegExp = /\$\$((?:.|\n)*?)(\$\$)/mg;
+			break;
+		case &quot;\\(&quot;: // inline equations
+			this.lookaheadRegExp = /\\\(((?:.|\n)*?)(\\\))/mg;
+			break;
+		default:
+			break;
+		}
+		this.lookaheadRegExp.lastIndex = w.matchStart;
+		var lookaheadMatch = this.lookaheadRegExp.exec(w.source);
+		if(lookaheadMatch &amp;&amp; lookaheadMatch.index == w.matchStart) {
+			createTiddlyElement(w.output,&quot;span&quot;,null,null,lookaheadMatch[0]);
+			w.nextMatch = this.lookaheadRegExp.lastIndex;
+		}
+	}
+});
+//}}}</pre>
+</div>
 <div title="Meta" creator="Piotr Migdał" modifier="Piotr Migdał" created="201306141005" modified="201306141104" changecount="2">
 <pre>Add:
 * LaTeX
@@ -583,11 +677,30 @@ Write about research stuff or leave it for another page/lab book?
 
 Or use Gitit for other texts/notes?</pre>
 </div>
+<div title="Revisions Plugin" creator="Piotr Migdał" modifier="Piotr Migdał" created="201306291429" tags="systemConfig plugin" changecount="1">
+<pre>/***
+!Revisions Plugin
+!!!About
+|Author : Bradley Meck|
+|Date : Dec 24, 2006|
+
+This plugin allows people to save multiple revisions of tiddlers and view the changes of tiddlers over time with the ability to restore previous versions of a tiddler.
+***/
+//{{{
+config.macros.revisionsPlugin = { };
+config.macros.revisionsPlugin.addRevision = function( tiddler, newContent ){
+	
+}
+//}}}</pre>
+</div>
 <div title="SiteSubtitle" creator="Piotr Migdał" modifier="Piotr Migdał" created="201305191805" changecount="1">
 <pre>CC BY</pre>
 </div>
 <div title="SiteTitle" creator="Piotr Migdał" modifier="Piotr Migdał" created="201305191804" changecount="1">
 <pre>Piotr Migdał's idea dump</pre>
+</div>
+<div title="Unlinked findings" creator="Piotr Migdał" modifier="Piotr Migdał" created="201306201548" changecount="1">
+<pre>* The maximal number of words with colours scales as the square root of total number of words</pre>
 </div>
 </div>
 <!--POST-STOREAREA-->
